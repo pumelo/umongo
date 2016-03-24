@@ -5,7 +5,7 @@ before_install:
 - echo 'deb http://downloads-distro.mongodb.org/repo/ubuntu-upstart dist 10gen' |
   sudo tee /etc/apt/sources.list.d/mongodb.list
 - travis_retry sudo apt-get update
-- travis_retry sudo apt-get install mongodb-org-server mongo-org-shell
+- travis_retry sudo apt-get install mongodb-org-server=2.6.12 mongo-org-shell=2.6.12
 language: python
 python:
 - '3.4'
