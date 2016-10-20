@@ -1,6 +1,7 @@
 import re
 from copy import copy
 from marshmallow.fields import Field
+from collections import OrderedDict
 
 from .template import Template, Implementation
 from .data_proxy import data_proxy_factory
@@ -35,8 +36,8 @@ def _is_child_embedded_document(bases):
 
 def _collect_fields(nmspc):
     """Split dict between fields and non-fields elements"""
-    schema_nmspc = {}
-    doc_nmspc = {}
+    schema_nmspc = OrderedDict()
+    doc_nmspc = OrderedDict()
     for key, item in nmspc.items():
         if isinstance(item, Field):
             schema_nmspc[key] = item
@@ -193,7 +194,9 @@ class BaseBuilder:
         # Given the fields provided by the template are going to be
         # customized in the implementation, we copy them to avoid
         # overwriting if two implementations are created
-        schema_nmspc = {k: copy(v) for k, v in schema_template_fields.items()}
+        schema_nmspc = OrderedDict()
+        for k, v in schema_template_fields.items():
+            schema_nmspc[k] = copy(v)
         # Create schema by retrieving inherited schema classes
         schema_bases = tuple([base.Schema for base in bases
                               if hasattr(base, 'Schema')])

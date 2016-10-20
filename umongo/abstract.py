@@ -12,6 +12,8 @@ class BaseSchema(MaSchema):
     """
     All schema used in umongo should inherit from this base schema
     """
+    class Meta:
+        ordered = True
 
     __check_unknown_fields = validates_schema(pass_original=True)(
         schema_validator_check_unknown_fields)

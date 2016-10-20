@@ -1,4 +1,5 @@
 from marshmallow import ValidationError, missing
+from collections import OrderedDict
 
 from .abstract import BaseDataObject
 from .exceptions import FieldNotLoadedError
@@ -32,7 +33,7 @@ class BaseDataProxy:
             return self._to_mongo()
 
     def _to_mongo(self):
-        mongo_data = {}
+        mongo_data = OrderedDict()
         for k, v in self._data.items():
             field = self._fields_from_mongo_key[k]
             v = field.serialize_to_mongo(v)
@@ -41,7 +42,7 @@ class BaseDataProxy:
         return mongo_data
 
     def _to_mongo_update(self):
-        mongo_data = {}
+        mongo_data = OrderedDict()
         set_data = {}
         unset_data = []
         for name, field in self._fields.items():
@@ -61,7 +62,7 @@ class BaseDataProxy:
         return mongo_data or None
 
     def from_mongo(self, data, partial=False):
-        self._data = {}
+        self._data = OrderedDict()
         for k, v in data.items():
             field = self._fields_from_mongo_key[k]
             self._data[k] = field.deserialize_from_mongo(v)
@@ -229,11 +230,15 @@ def data_proxy_factory(basename, schema):
 
     cls_name = "%sDataProxy" % basename
 
+    _fields_from_mongo_key = OrderedDict()
+    for k, v in schema.fields.items():
+        _fields_from_mongo_key[v.attribute or k] = v
+
     nmspc = {
         '__slots__': (),
         'schema': schema,
         '_fields': schema.fields,
-        '_fields_from_mongo_key': {v.attribute or k: v for k, v in schema.fields.items()}
+        '_fields_from_mongo_key': _fields_from_mongo_key
     }
 
     data_proxy_cls = type(cls_name, (BaseDataProxy, ), nmspc)
